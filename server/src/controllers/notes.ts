@@ -46,3 +46,12 @@ export const updateNote: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+export const deleteNote: RequestHandler = async (req, res, next) => {
+  const noteId = req.params.id;
+  try {
+    await NoteModel.findByIdAndDelete(noteId);
+    res.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+};
