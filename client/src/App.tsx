@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
+import { FaPlus } from "react-icons/fa";
 import AddNoteDialog from "./components/AddNoteDialog";
 import Notes from "./components/Notes";
 import { Note as NoteModels } from "./models/note";
 import * as NotesApi from "./network/notes_api";
 import styles from "./styles/NotesPage.module.css";
+import styleUtils from "./styles/utils.module.css";
 
 const App = () => {
   const [notes, setNotes] = useState<NoteModels[]>([]);
@@ -20,13 +22,31 @@ const App = () => {
     }
     loadNotes();
   }, []);
+  async function deleteNote(note: NoteModels) {
+    try {
+      await NotesApi.deleteNote(note._id);
+      setNotes(notes.filter((existingNote) => existingNote._id !== note._id));
+    } catch (error) {
+      console.error(error);
+    }
+  }
   return (
     <Container>
-      <Button onClick={() => setShowAddNotes(true)}>Add Note</Button>
+      <Button
+        className={`mb-4 ${styleUtils.blockCenter} ${styleUtils.flexCenter}`}
+        onClick={() => setShowAddNotes(true)}
+      >
+        <FaPlus />
+        Add Note
+      </Button>
       <Row xs={1} md={2} lg={3} className="g-4">
         {notes.map((note) => (
           <Col key={note._id}>
-            <Notes note={note} className={styles.note} />
+            <Notes
+              note={note}
+              className={styles.note}
+              onDeleteNoteClicked={deleteNote}
+            />
           </Col>
         ))}
       </Row>
