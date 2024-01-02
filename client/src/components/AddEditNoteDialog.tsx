@@ -11,19 +11,34 @@ import { useForm } from "react-hook-form";
 import { Note } from "../models/note";
 import * as NotesApi from "../network/notes_api";
 import { NoteInput } from "../network/notes_api";
-interface AddNoteDialogProps {
+interface AddEditNoteDialogProps {
+  noteToEdit?: Note;
   onDismiss: () => void;
   onNoteSaved: (note: Note) => void;
 }
-const AddNoteDialog = ({ onDismiss, onNoteSaved }: AddNoteDialogProps) => {
+const AddEditNoteDialog = ({
+  noteToEdit,
+  onDismiss,
+  onNoteSaved,
+}: AddEditNoteDialogProps) => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<NoteInput>();
+  } = useForm<NoteInput>({
+    defaultValues: {
+      title: noteToEdit?.title || "",
+      text: noteToEdit?.text || "",
+    },
+  });
   async function onSubmit(Input: NoteInput) {
     try {
-      const noteResponse = await NotesApi.createNote(Input);
+      let noteResponse: Note;
+      if (noteToEdit) {
+        noteResponse = await NotesApi.updateNote(noteToEdit._id, Input);
+      } else {
+        noteResponse = await NotesApi.createNote(Input);
+      }
       onNoteSaved(noteResponse);
     } catch (error) {
       console.error(error);
@@ -33,10 +48,10 @@ const AddNoteDialog = ({ onDismiss, onNoteSaved }: AddNoteDialogProps) => {
   return (
     <Modal show onHide={onDismiss}>
       <ModalHeader closeButton>
-        <ModalTitle>Add Note</ModalTitle>
+        <ModalTitle>{noteToEdit ? "Edit note" : "Add new note"}</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <Form id="addNote" onSubmit={handleSubmit(onSubmit)}>
+        <Form id="addEditNoteForm" onSubmit={handleSubmit(onSubmit)}>
           <Form.Group className="mb-3">
             <Form.Label>Title</Form.Label>
             <Form.Control
@@ -61,7 +76,7 @@ const AddNoteDialog = ({ onDismiss, onNoteSaved }: AddNoteDialogProps) => {
         </Form>
       </ModalBody>
       <ModalFooter>
-        <Button type="submit" form="addNote" disabled={isSubmitting}>
+        <Button type="submit" form="addEditNoteForm" disabled={isSubmitting}>
           Save
         </Button>
       </ModalFooter>
@@ -69,4 +84,4 @@ const AddNoteDialog = ({ onDismiss, onNoteSaved }: AddNoteDialogProps) => {
   );
 };
 
-export default AddNoteDialog;
+export default AddEditNoteDialog;

@@ -14,10 +14,16 @@ import { formatDate } from "../utils/formatDate";
 
 interface NoteProps {
   note: NoteModels;
+  onNoteClick: (note: NoteModels) => void;
   onDeleteNoteClicked: (note: NoteModels) => void;
   className?: string;
 }
-const Notes = ({ note, className, onDeleteNoteClicked }: NoteProps) => {
+const Notes = ({
+  note,
+  className,
+  onDeleteNoteClicked,
+  onNoteClick,
+}: NoteProps) => {
   const { title, text, createdAt, updatedAt } = note;
 
   let createdUpdatedText: string;
@@ -27,7 +33,10 @@ const Notes = ({ note, className, onDeleteNoteClicked }: NoteProps) => {
     createdUpdatedText = "Created at " + formatDate(createdAt);
   }
   return (
-    <Card className={`${styles.noteCard} ${className}`}>
+    <Card
+      className={`${styles.noteCard} ${className}`}
+      onClick={() => onNoteClick(note)}
+    >
       <CardBody className={styles.cardBody}>
         <CardTitle className={styleUtils.flexCenter}>
           {title}
